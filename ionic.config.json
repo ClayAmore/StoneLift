@@ -1,0 +1,7 @@
+{
+  "name": "StoneLift",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react-vite"
+}
