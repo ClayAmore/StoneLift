@@ -1,0 +1,22 @@
+.ion-card-list-item {
+    font-size: .8rem;
+}
+
+.ion-label-custom {
+    margin: 0;
+}
+
+ion-backdrop {
+    opacity: 0.3;
+    background: var(--ion-color-primary);
+}
+
+ion-footer {
+    background: var(--ion-color-primary-contrast);
+}
+
+ion-thumbnail {
+    --size: 140px;
+    --border-radius: 50%;
+    margin: 0 auto;
+  }

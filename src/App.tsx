@@ -10,10 +10,14 @@ import {
   setupIonicReact
 } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
-import { ellipse, square, triangle } from 'ionicons/icons';
-import Tab1 from './pages/Tab1';
-import Tab2 from './pages/Tab2';
-import Tab3 from './pages/Tab3';
+import MainPage from './pages/MainPage';
+import Exercises from './pages/ExercisesPage';
+import { Drivers, Storage } from '@ionic/storage';
+import { createContext, useReducer, useEffect, useState } from "react";
+import exercisesJSON from './models/exercises.json';
+import workoutsJSON from './models/workouts.json';
+
+import { home, time, barbell } from 'ionicons/icons';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -33,44 +37,102 @@ import '@ionic/react/css/display.css';
 
 /* Theme variables */
 import './theme/variables.css';
+import { } from 'react';
+import ExerciseDetailPage from './modals/ExerciseDetailModal';
+import { Exercise } from './models/exercise';
+import { Workout } from './models/workout';
+import WorkoutEditPage from './modals/WorkoutEditModal';
+import { WorkoutHistoryEntry } from './models/history';
+import HistoryPage from './pages/HistoryPage';
 
 setupIonicReact();
 
-const App: React.FC = () => (
-  <IonApp>
-    <IonReactRouter>
-      <IonTabs>
-        <IonRouterOutlet>
-          <Route exact path="/tab1">
-            <Tab1 />
-          </Route>
-          <Route exact path="/tab2">
-            <Tab2 />
-          </Route>
-          <Route path="/tab3">
-            <Tab3 />
-          </Route>
-          <Route exact path="/">
-            <Redirect to="/tab1" />
-          </Route>
-        </IonRouterOutlet>
-        <IonTabBar slot="bottom">
-          <IonTabButton tab="tab1" href="/tab1">
-            <IonIcon aria-hidden="true" icon={triangle} />
-            <IonLabel>Tab 1</IonLabel>
-          </IonTabButton>
-          <IonTabButton tab="tab2" href="/tab2">
-            <IonIcon aria-hidden="true" icon={ellipse} />
-            <IonLabel>Tab 2</IonLabel>
-          </IonTabButton>
-          <IonTabButton tab="tab3" href="/tab3">
-            <IonIcon aria-hidden="true" icon={square} />
-            <IonLabel>Tab 3</IonLabel>
-          </IonTabButton>
-        </IonTabBar>
-      </IonTabs>
-    </IonReactRouter>
-  </IonApp>
-);
+interface IAppContext {
+  storage: Storage,
+  exercises: readonly Exercise[],
+  workouts: readonly Workout[],
+  historyEntries: readonly WorkoutHistoryEntry[],
+  setExercises: (exercises: Exercise[]) => void,
+  setWorkouts: (workouts: Workout[]) => void,
+  setHistoryEntries: (historyEntries: WorkoutHistoryEntry[]) => void
+}
+
+const storage = new Storage({
+  name: '__mydb',
+  driverOrder: [Drivers.IndexedDB, Drivers.LocalStorage]
+});
+
+export let AppContext = createContext<IAppContext>({ 
+  storage: storage, 
+  exercises: [], 
+  workouts: [], 
+  historyEntries: [],
+  setExercises: () => { }, 
+  setWorkouts: () => { }, 
+  setHistoryEntries: () => { }
+});
+
+const App: React.FC = () => {
+  const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [workouts, setWorkouts] = useState<Workout[]>([]);
+  const [historyEntries, setHistoryEntries] = useState<WorkoutHistoryEntry[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const setupStore = async () => {
+      await storage.create();
+
+      const exercisesResult: Exercise[] = await storage.get("exercises") ?? [];
+      const workoutsResult: Workout[] = await storage.get("workouts") ?? [];
+      const historyEntriesResult: WorkoutHistoryEntry[] = await storage.get("historyEntries") ?? [];
+
+      if(exercisesResult.length < 1) await storage.set("exercises", exercisesJSON);
+      if(workoutsResult.length < 1) storage.set("workouts", []);
+      if(historyEntriesResult.length < 1) storage.set("historyEntries", []);
+      
+      setExercises(await storage.get("exercises"));
+      setWorkouts(await storage.get("workouts"));
+      setHistoryEntries(await storage.get("historyEntries"));
+    }
+    setupStore().then(() => {
+      setIsLoading(false);
+    });
+  }, [])
+
+  if(isLoading) return <div>Loading</div>
+
+  return (
+    <AppContext.Provider value={{ storage, exercises, workouts, historyEntries, setWorkouts, setExercises, setHistoryEntries }}>
+      <IonApp>
+        <IonReactRouter>
+          <IonTabs>
+            <IonRouterOutlet>
+              <Route exact path="/home" component={MainPage} />
+              <Route exact path="/history" component={HistoryPage} />
+              <Route exact path="/exercises" component={Exercises} />
+              <Redirect exact path="/" to='/home' />
+            </IonRouterOutlet>
+            <IonTabBar slot="bottom">
+              <IonTabButton tab="home" href="/home">
+                <IonIcon icon={home} />
+                <IonLabel>Home</IonLabel>
+              </IonTabButton>
+
+              <IonTabButton tab="history" href="/history">
+                <IonIcon icon={time} />
+                <IonLabel>History</IonLabel>
+              </IonTabButton>
+
+              <IonTabButton tab="exercises" href="/exercises">
+                <IonIcon icon={barbell} />
+                <IonLabel>Exercises</IonLabel>
+              </IonTabButton>
+            </IonTabBar>
+          </IonTabs>
+        </IonReactRouter>
+      </IonApp>
+    </AppContext.Provider>
+  );
+}
 
 export default App;
