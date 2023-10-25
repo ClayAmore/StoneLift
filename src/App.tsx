@@ -1,23 +1,24 @@
-import { Redirect, Route } from 'react-router-dom';
 import {
   IonApp,
+  IonContent,
   IonIcon,
   IonLabel,
   IonRouterOutlet,
+  IonSpinner,
   IonTabBar,
   IonTabButton,
   IonTabs,
   setupIonicReact
 } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
-import MainPage from './pages/MainPage';
-import Exercises from './pages/ExercisesPage';
 import { Drivers, Storage } from '@ionic/storage';
-import { createContext, useReducer, useEffect, useState } from "react";
+import { createContext, useEffect, useState } from "react";
+import { Redirect, Route } from 'react-router-dom';
 import exercisesJSON from './models/exercises.json';
-import workoutsJSON from './models/workouts.json';
+import Exercises from './pages/ExercisesPage';
+import MainPage from './pages/MainPage';
 
-import { home, time, barbell } from 'ionicons/icons';
+import { barbell, home, time } from 'ionicons/icons';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -28,22 +29,20 @@ import '@ionic/react/css/structure.css';
 import '@ionic/react/css/typography.css';
 
 /* Optional CSS utils that can be commented out */
-import '@ionic/react/css/padding.css';
+import '@ionic/react/css/display.css';
+import '@ionic/react/css/flex-utils.css';
 import '@ionic/react/css/float-elements.css';
+import '@ionic/react/css/padding.css';
 import '@ionic/react/css/text-alignment.css';
 import '@ionic/react/css/text-transformation.css';
-import '@ionic/react/css/flex-utils.css';
-import '@ionic/react/css/display.css';
 
 /* Theme variables */
-import './theme/variables.css';
 import { } from 'react';
-import ExerciseDetailPage from './modals/ExerciseDetailModal';
 import { Exercise } from './models/exercise';
-import { Workout } from './models/workout';
-import WorkoutEditPage from './modals/WorkoutEditModal';
 import { WorkoutHistoryEntry } from './models/history';
+import { Workout } from './models/workout';
 import HistoryPage from './pages/HistoryPage';
+import './theme/variables.css';
 
 setupIonicReact();
 
@@ -62,13 +61,13 @@ const storage = new Storage({
   driverOrder: [Drivers.IndexedDB, Drivers.LocalStorage]
 });
 
-export let AppContext = createContext<IAppContext>({ 
-  storage: storage, 
-  exercises: [], 
-  workouts: [], 
+export let AppContext = createContext<IAppContext>({
+  storage: storage,
+  exercises: [],
+  workouts: [],
   historyEntries: [],
-  setExercises: () => { }, 
-  setWorkouts: () => { }, 
+  setExercises: () => { },
+  setWorkouts: () => { },
   setHistoryEntries: () => { }
 });
 
@@ -86,10 +85,10 @@ const App: React.FC = () => {
       const workoutsResult: Workout[] = await storage.get("workouts") ?? [];
       const historyEntriesResult: WorkoutHistoryEntry[] = await storage.get("historyEntries") ?? [];
 
-      if(exercisesResult.length < 1) await storage.set("exercises", exercisesJSON);
-      if(workoutsResult.length < 1) storage.set("workouts", []);
-      if(historyEntriesResult.length < 1) storage.set("historyEntries", []);
-      
+      if (exercisesResult.length < 1) await storage.set("exercises", exercisesJSON);
+      if (workoutsResult.length < 1) storage.set("workouts", []);
+      if (historyEntriesResult.length < 1) storage.set("historyEntries", []);
+
       setExercises(await storage.get("exercises"));
       setWorkouts(await storage.get("workouts"));
       setHistoryEntries(await storage.get("historyEntries"));
@@ -99,7 +98,15 @@ const App: React.FC = () => {
     });
   }, [])
 
-  if(isLoading) return <div>Loading</div>
+  if (isLoading) return (
+    <IonApp>
+      <IonContent fullscreen>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+          <IonSpinner></IonSpinner>
+        </div>
+      </IonContent>
+    </IonApp>
+  );
 
   return (
     <AppContext.Provider value={{ storage, exercises, workouts, historyEntries, setWorkouts, setExercises, setHistoryEntries }}>

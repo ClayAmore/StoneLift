@@ -1,14 +1,13 @@
-import { InputChangeEventDetail, IonAvatar, IonButton, IonButtons, IonCard, IonCardContent, IonCardHeader, IonCol, IonContent, IonGrid, IonHeader, IonIcon, IonImg, IonInput, IonItem, IonLabel, IonList, IonNav, IonPage, IonReorder, IonReorderGroup, IonRow, IonToolbar, ItemReorderEventDetail, useIonModal } from '@ionic/react';
+import { InputChangeEventDetail, IonAvatar, IonButton, IonButtons, IonCard, IonCardContent, IonCardHeader, IonCol, IonContent, IonGrid, IonHeader, IonIcon, IonImg, IonInput, IonItem, IonLabel, IonList, IonPage, IonReorder, IonReorderGroup, IonRow, IonToolbar, ItemReorderEventDetail, useIonModal } from '@ionic/react';
 import { OverlayEventDetail } from '@ionic/react/dist/types/components/react-component-lib/interfaces';
+import { addOutline, trashOutline } from 'ionicons/icons';
 import { useContext, useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { AppContext } from '../App';
-import { Workout, WorkoutCycle } from '../models/workout';
-import ExerciseDetailModal from './ExerciseDetailModal';
-import './workoutEditModal.css';
-import ExerciseListModal from './ExercisesListModal';
 import { Exercise } from '../models/exercise';
-import { addOutline, trashOutline } from 'ionicons/icons';
+import { Workout } from '../models/workout';
+import ExerciseListModal from './ExercisesListModal';
+import './workoutEditModal.css';
 
 interface InputCustomEvent extends CustomEvent {
     detail: InputChangeEventDetail;
@@ -47,6 +46,7 @@ const WorkoutEditModal: React.FC<WorkoutEditModalProps> = (props) => {
             onWillDismiss: (ev: CustomEvent<OverlayEventDetail>) => {
                 const modifiedCycles = [...workout.cycle];
                 const selectedExercises: Exercise[] = ev.detail.data;
+                if(!selectedExercises) return;
                 for (let i = 0; i < selectedExercises.length; i++) {
                     modifiedCycles.push({
                         iterations: 1,
@@ -193,9 +193,9 @@ const WorkoutEditModal: React.FC<WorkoutEditModalProps> = (props) => {
                                                 <IonButton size='default' className='ion-margin-start ion-margin-vertical' slot='end' expand='block' onClick={() => {
                                                     const cycleIndex = workout.cycle.findIndex(c => c.set.exercise.id == cycle.set.exercise.id);
                                                     const modifiedCycle= {...workout.cycle[cycleIndex]};
+                                                    modifiedCycle.reps.push(cycle.reps[iterations-1]);
+                                                    modifiedCycle.weight.push(cycle.weight[iterations-1]);
                                                     modifiedCycle.iterations++;
-                                                    modifiedCycle.reps.push(10);
-                                                    modifiedCycle.weight.push(10);
                                                     setWorkout({...workout, cycle: [...workout.cycle.slice(0, cycleIndex), modifiedCycle ,...workout.cycle.slice(cycleIndex+1)]})
                                                 }} color={'secondary'}>
                                                     <IonIcon icon={addOutline}></IonIcon>
