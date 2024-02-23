@@ -1,0 +1,40 @@
+[{
+    "id": "workout-1",
+    "name": "Chest",
+    "cycle": [
+      {
+        "set": {
+          "exercise": {
+            "id": "Barbell_Bench_Press_-_Medium_Grip",
+            "name": "Barbell Bench Press - Medium Grip",
+            "primaryMuscles": [
+              "chest"
+            ],    
+            "images": [
+              "Barbell_Bench_Press_-_Medium_Grip/0.jpg",
+              "Barbell_Bench_Press_-_Medium_Grip/1.jpg"
+            ]
+          }
+        },
+        "reps": [10, 10, 10],
+        "weight": [1, 1 , 1],
+        "iterations": 3
+      },
+      {
+        "set": {
+          "exercise": {
+            "id": "Barbell_Curl",
+            "name": "Barbell Curl",
+            "category": "Strength",
+            "images": [
+              "Barbell_Curl/0.jpg",
+              "Barbell_Curl/1.jpg"
+            ]
+          }
+        },
+        "reps": [8, 6],
+        "weight": [1, 1],
+        "iterations": 2
+      }
+    ]
+  }]
